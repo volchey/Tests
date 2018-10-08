@@ -26,6 +26,9 @@
  *
  */
 
+char *d_buf;
+
+
 Coder::Coder() : m_buf(NULL), m_size(0)
 {}
 
@@ -40,6 +43,9 @@ Coder::~Coder()
 
 void Coder::encode()
 {
+	d_buf = new char[m_size];
+	for (int i = 0; i < m_size; i++)
+		d_buf[i] = m_buf[i];
 	::encode( m_buf, m_size );
 }
 
@@ -65,6 +71,7 @@ int Coder::size() const
 
 void Coder::decode()
 {
+	m_buf = d_buf;
 }
 
 Coder	&Coder::operator=(const Coder &obj)
@@ -72,7 +79,9 @@ Coder	&Coder::operator=(const Coder &obj)
 	if (this != &obj)
 	{
 		delete m_buf;
-		m_buf = strndup(obj.m_buf, obj.m_size);
+		m_buf = new char[obj.m_size];
+		for (int i = 0; i < obj.m_size; i++)
+			m_buf[i] = obj.m_buf[i];
 		m_size = obj.m_size;
 	}
 	return (*this);
