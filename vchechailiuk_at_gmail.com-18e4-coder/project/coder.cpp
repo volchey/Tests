@@ -26,26 +26,29 @@
  *
  */
 
-char *d_buf;
-
 
 Coder::Coder() : m_buf(NULL), m_size(0)
 {}
 
 Coder::Coder(const Coder &obj)
 {
-	m_buf = strndup(obj.m_buf, obj.m_size);
-	m_size = obj.m_size;
+	m_buf = new char[obj.m_size];
+	if (!m_buf)
+		std::cout << "Can't allocate memmory" << std::endl;
+	else
+	{
+		memcpy(m_buf, obj.m_buf, obj.m_size);
+		m_size = obj.m_size;
+	}
 }
 
 Coder::~Coder()
-{}
+{
+	delete[] m_buf;
+}
 
 void Coder::encode()
 {
-	d_buf = new char[m_size];
-	for (int i = 0; i < m_size; i++)
-		d_buf[i] = m_buf[i];
 	::encode( m_buf, m_size );
 }
 
@@ -54,9 +57,13 @@ void Coder::set(const char *buf, int size) throw(std::logic_error)
 	if (!buf || size <= 0)
 		throw std::logic_error("Error");
 	m_buf = new char[size];
-	for (int i = 0; i < size; i++)
-		m_buf[i] = buf[i];
-	m_size = size;
+	if (!m_buf)
+		std::cout << "Can't allocate memmory" << std::endl;
+	else
+	{
+		memcpy(m_buf, buf, size);
+		m_size = size;
+	}
 }
 
 char *Coder::buf() const
@@ -71,7 +78,11 @@ int Coder::size() const
 
 void Coder::decode()
 {
-	m_buf = d_buf;
+	m_buf[m_size] |= 255;
+	for (int i = m_size - 1; i >= 0; --i)
+	{
+		m_buf[i] ^= m_buf[i + 1];
+	}
 }
 
 Coder	&Coder::operator=(const Coder &obj)
@@ -80,8 +91,13 @@ Coder	&Coder::operator=(const Coder &obj)
 	{
 		delete m_buf;
 		m_buf = new char[obj.m_size];
-		for (int i = 0; i < obj.m_size; i++)
-			m_buf[i] = obj.m_buf[i];
+		if (!m_buf)
+			std::cout << "Can't allocate memmory" << std::endl;
+		else
+		{
+			memcpy(m_buf, obj.m_buf, obj.m_size);
+			m_size = obj.m_size;
+		}
 		m_size = obj.m_size;
 	}
 	return (*this);
